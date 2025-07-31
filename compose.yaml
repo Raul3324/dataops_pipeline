@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  hadoop-namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-namenode
+    environment:
+      - CLUSTER_NAME=demo
+      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:8020
+      - HDFS_CONF_dfs_namenode_rpc-address=hadoop-namenode:8020
+      - HDFS_CONF_dfs_namenode_http-address=hadoop-namenode:9870
+    ports:
+      - "9870:9870"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    networks:
+      - dataops
+
+  hadoop-datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-datanode
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:8020
+      - HDFS_CONF_dfs_datanode_address=0.0.0.0:9866
+      - HDFS_CONF_dfs_datanode_http-address=0.0.0.0:9864
+      - HDFS_CONF_dfs_datanode_ipc-address=0.0.0.0:9867
+    ports:
+      - "9864:9864"
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    networks:
+      - dataops
+
+  spark-master:
+    image: bitnami/spark:3.5.0
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    volumes:
+      - ./scripts:/opt/spark/scripts
+    networks:
+      - dataops
+
+  spark-worker:
+    image: bitnami/spark:3.5.0
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    ports:
+      - "8081:8081"
+    networks:
+      - dataops
+
+  airflow:
+    image: apache/airflow:2.9.1-python3.10
+    container_name: airflow
+    depends_on:
+      - spark-master
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor # local executor are paralelism, dar nu poate fi folosit cu sqlite
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/airflow.db:/opt/airflow/airflow.db
+      - ./airflow/entrypoint.sh:/entrypoint.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8082:8080"
+    command: ["bash", "/entrypoint.sh"]
+    networks:
+      - dataops
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
+
+networks:
+  dataops:
+    driver: bridge
+
