@@ -49,3 +49,5 @@ data/output/application_train_delta/
 ### Bonus task
 
 The bonus task is implemented in a Jupyter Notebook under notebooks/, using only local files and Python.
+It consists of a series of operations on the datasets application_train and bureau, from cleaning them to feature engineering, and, finally,
+to training an XGBOOST classifier on them.
