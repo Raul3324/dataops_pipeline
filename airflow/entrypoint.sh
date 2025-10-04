@@ -8,7 +8,7 @@ echo "Initializing Airflow DB..."
 airflow db migrate
 
 echo "Starting Airflow webserver..."
-airflow webserver &
+airflow webserver
 
 echo "Starting Airflow scheduler..."
-exec airflow scheduler
+airflow scheduler
