@@ -1,6 +1,6 @@
 # Home Credit Data Pipeline
 
-This project uses a mini data platform powered by Docker, Apache Spark, Hadoop (HDFS), Airflow, and Delta Lake — simulating a data ingestion and transformation pipeline.
+This project uses a mini data platform powered by Docker, Apache Spark, Hadoop (HDFS), Airflow, and Delta Lake, simulating a data ingestion and transformation pipeline.
 
 ## Data source
 The data can be found in the Kaggle Home Credit Default Risk page https://www.kaggle.com/c/home-credit-default-risk. 
